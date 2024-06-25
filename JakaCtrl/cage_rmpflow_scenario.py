@@ -31,6 +31,9 @@ from .senut import make_rob_cam_view_window
 from .remcmdmod import RemCmd, RemCmdList
 
 from .motomod import MotoMan
+
+from omni.isaac.sensor import Camera
+import omni.isaac.core.utils.numpy.rotations as rot_utils
 # Copyright (c) 2022-2023, NVIDIA CORPORATION. All rights reserved.
 #
 # NVIDIA CORPORATION and its licensors retain all intellectual property
@@ -87,6 +90,7 @@ class CageRmpflowScenario(ScenarioBase):
         self.add_ground(ground_opt)
 
 
+
         order = "XYZ"
         pre_rot = [0,0,-90]
         (pos0, rot0) = ([0.14, 0, 0.77], [0, -150, 180])
@@ -137,6 +141,17 @@ class CageRmpflowScenario(ScenarioBase):
         mm.AddMotoTray("tray2", "000000", rot=[a90,0,zang],pos=[-xoff,+yoff,0.0])
         mm.AddMotoTray("tray3", "myc000", rot=[a90,0,zang],pos=[-xoff,-yoff,0.0])
         mm.AddMotoTray("tray4", "000000", rot=[a90,0,zang],pos=[+xoff,-yoff,0.0])
+        carb.log_warn("Loading additional cameras...")
+
+        camera = Camera(
+            prim_path="/World/Kinect",
+            position=np.array([0.0, 0.0, 25.0]),
+            frequency=20,
+            resolution=(256, 256),
+            orientation=rot_utils.euler_angles_to_quats(np.array([0, 90, 0]), degrees=True),
+        )
+        camera.initialize()
+        carb.log_warn("Camera loaded")
         asyncio.ensure_future(self.Connect2WebsocketWS())
 
     def add_grippers_to_robots(self):
